@@ -36,6 +36,12 @@ public class ClassManager {
 			a = (Kit) it.next();
 			if ((a != null) && (a.getName().equalsIgnoreCase(kitname))) {
 				kit = kitname;
+				if (plugin.players.containsKey(p.getName())) {
+					plugin.players.remove(p.getName());
+				}
+				plugin.players.put(p.getName(), kit);
+				giveKit(p);
+				p.sendMessage(ChatColor.GREEN + "You are now the kit: " + kit);
 			}
 
 		}
@@ -49,6 +55,7 @@ public class ClassManager {
 			notClassYet(p, kit);
 			return;
 		}
+
 	}
 
 	private void notClassYet(Player p, String kit) {
@@ -69,7 +76,6 @@ public class ClassManager {
 				a.giveKit(p);
 				done = true;
 			}
-
 		}
 
 		if (!done) {
@@ -79,6 +85,7 @@ public class ClassManager {
 			setKit(p, cn);
 		}
 		p.setGameMode(GameMode.SURVIVAL);
+
 	}
 
 	public boolean hasperm(Player p, String kit) {

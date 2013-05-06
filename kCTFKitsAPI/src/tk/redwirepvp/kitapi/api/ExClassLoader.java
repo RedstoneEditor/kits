@@ -140,8 +140,14 @@ public class ExClassLoader {
 														+ " by "
 														+ (String) a
 																.getAuthor());
-
 												je = null;
+												plugin.getServer()
+												.getConsoleSender()
+												.sendMessage(
+														ChatColor.GOLD
+																+ "Registered command???");
+												plugin.registerCommand(a
+														.getName());
 											}
 										}
 									} catch (Exception ex) {
@@ -149,6 +155,7 @@ public class ExClassLoader {
 												+ ex.getLocalizedMessage()
 												+ " caused " + className
 												+ " to fail to load!");
+										ex.printStackTrace();
 									} catch (Error ex) {
 										this.plugin.log.warning("A "
 												+ ex.getLocalizedMessage()
@@ -196,7 +203,6 @@ public class ExClassLoader {
 
 						a.onEnable();
 						Classes.add(a);
-						plugin.registerCommand(a.getName());
 						loaded = true;
 						this.plugin.log.info("Loaded " + a.getName() + " v"
 								+ a.getVersion() + " by " + a.getAuthor());

@@ -17,59 +17,51 @@ public class Main extends JavaPlugin {
 	private static Main plugin;
 	public static Logger log;
 	public ClassManager cm;
-    private static CommandMap cmap;
-	private HashMap<String, String> players = new HashMap<String, String>();// Player
+	private static CommandMap cmap;
+	public HashMap<String, String> players = new HashMap<String, String>();// Player
 																			// name,
 																			// Kit
 																			// name
-	public void registerCommand(String s){
-        CCommand cmd = new CCommand(s);
-        cmap.register("", cmd);
-        cmd.setExecutor(this);
+	public static CommandMap commandMap = null;
+	static {
+		try {
+			if (Bukkit.getServer() instanceof CraftServer) {
+				final Field f = CraftServer.class
+						.getDeclaredField("commandMap");
+				f.setAccessible(true);
+				commandMap = (CommandMap) f.get(Bukkit.getServer());
+			}
+		} catch (final SecurityException e) {
+			System.out.println("Please disable the security manager");
+		} catch (final Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
+
+	public void registerCommand(String s) {
+
+		Command c = new Command(s) {
+
+			@Override
+			public boolean execute(CommandSender arg0, String arg1,
+					String[] arg2) {
+
+			Main.this.cm.setKit((Player)arg0, this.getName());
+
+				return false;
+			}
+		};
+		c.setDescription("Your command description");
+		commandMap.register("/", c);
+
+	}
+
 	public void onEnable() {
 		plugin = this;
 		log = getLogger();
 		cm = new ClassManager(this);
-	       try{
-	            if(Bukkit.getServer() instanceof CraftServer){
-	                final Field f = CraftServer.class.getDeclaredField("commandMap");
-	                f.setAccessible(true);
-	                cmap = (CommandMap)f.get(Bukkit.getServer());
-	            }
-	        } catch (Exception e){
-	            e.printStackTrace();
-	        }
-	        
-	    }
-	    public CommandMap getCommandMap(){
-	        return cmap;
-	    }
-	    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
-	        cm.setKit((Player)sender, label);
-	        return true;
-	    }
-	    
-	    public class CCommand extends Command{
-	        
-	        private CommandExecutor exe = null;
-	 
-	        protected CCommand(String name) {
-	            super(name);
-	        }
-	 
-	        public boolean execute(CommandSender sender, String commandLabel,String[] args) {
-	            if(exe != null){
-	                exe.onCommand(sender, this, commandLabel,args);
-	            }
-	            return false;
-	        }
-	        
-	        public void setExecutor(CommandExecutor exe){
-	            this.exe = exe;
-	        }
-	    }
-
+		getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+	}
 
 	public void onDisable() {
 
@@ -82,7 +74,18 @@ public class Main extends JavaPlugin {
 	public String getPClass(Player p) {
 		if (this.players.containsKey(p.getName()))
 			return (String) this.players.get(p.getName());
-
 		return "";
+	}
+	
+	public boolean onCommand(CommandSender sender, Command cmd, String tag, String[] args){
+		if(cmd.getName().equalsIgnoreCase("quitkits")){
+			if(sender instanceof Player){
+				if(players.containsKey(sender.getName())){
+					players.remove(sender.getName());
+					
+				}
+			}
+		}
+		return false;
 	}
 }
